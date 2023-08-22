@@ -1,18 +1,19 @@
-import numpy as np
-import FinanceDataReader as fdr
+import yfinance as yf
 from astropy.time import Time
-import os
+
+def getData(company, start, end):
+    stockData = yf.download(company, start, end)
+    stockData["Daily Return"] = stockData['Adj Close'].pct_change()
+    stockData["Daily Return"][0] = 0
+    stockData["Time"] = Time(stockData.index.to_numpy()).mjd
+    stockData = stockData.drop(columns = ["Open", "High", "Low"]).reset_index(drop=True)
+    return stockData
 
 
-stock_symbol = "S&P500"
-start_date = "2010-01-01"
-stock_list = fdr.StockListing(stock_symbol)
-print(fdr.StockListing(stock_symbol+"-DELISTING"))
-# stock_list.to_parquet("./dataset/stock/%s/stock_list.parquet"%stock_symbol, index=False)
-# for row in range(stock_list.shape[0]):
-#     company = stock_list.iloc[row, :]
-#     df = fdr.DataReader(company.Symbol, start=start_date)
-#     try:
-#         df.to_parquet("./dataset/stock/%s/%s.parquet"%(stock_symbol, company.Symbol))
-#     except:
-#         pass
+def test(company):
+    stockData = yf.Ticker(company)
+    print(stockData.analyst_price_target)
+    return
+
+
+
